@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mark Attendance</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+        .content {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        .footer {
+            margin-top: auto;
+            background-color: #f5f5f5;
+            padding: 1rem 0;
+        }
+        #locationStatus {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 0.15rem solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border .75s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-dark text-white py-3">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h4 mb-0">Attendance System</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Mark Attendance</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-4">
+                                <h5 th:text="${courseName}">Course Name</h5>
+                                <p class="mb-0">
+                                    This session will expire at 
+                                    <span th:text="${#temporals.format(expiresAt, 'MMM dd, yyyy HH:mm')}">Time</span>
+                                </p>
+                            </div>
+                            
+                            <form id="attendanceForm">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Your Name</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="section" class="form-label">Section</label>
+                                    <input type="text" class="form-control" id="section" name="section" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="rollNumber" class="form-label">Roll Number</label>
+                                    <input type="text" class="form-control" id="rollNumber" name="rollNumber" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Location Verification</label>
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-outline-primary" id="getLocationBtn">
+                                            Verify My Location
+                                        </button>
+                                    </div>
+                                    <div id="locationStatus" class="text-muted">
+                                        Please verify your location to mark attendance.
+                                    </div>
+                                    <input type="hidden" id="latitude" name="latitude">
+                                    <input type="hidden" id="longitude" name="longitude">
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <small>
+                                        <strong>Note:</strong> You must be within the allowed radius of the class location to be marked present.
+                                        Please enable location services when prompted.
+                                    </small>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success" id="submitBtn" disabled>
+                                        Mark Attendance
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <div id="resultContainer" class="mt-4" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Attendance Management System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // DOM elements
+        const getLocationBtn = document.getElementById('getLocationBtn');
+        const locationStatus = document.getElementById('locationStatus');
+        const submitBtn = document.getElementById('submitBtn');
+        const attendanceForm = document.getElementById('attendanceForm');
+        const resultContainer = document.getElementById('resultContainer');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+        
+        // Get location button click handler
+        getLocationBtn.addEventListener('click', function() {
+            locationStatus.innerHTML = '<span class="loading-spinner"></span> Getting your location...';
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    // Success callback
+                    function(position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        
+                        latitudeInput.value = latitude;
+                        longitudeInput.value = longitude;
+                        
+                        locationStatus.innerHTML = 
+                            '<span class="text-success">✓ Location verified. You can now submit your attendance.</span>';
+                        submitBtn.disabled = false;
+                    },
+                    // Error callback
+                    function(error) {
+                        let errorMsg = '';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg = "You denied the request for geolocation. Please allow location access.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg = "Location information is unavailable. Please try again.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg = "The request to get your location timed out. Please try again.";
+                                break;
+                            default:
+                                errorMsg = "An unknown error occurred. Please try again.";
+                                break;
+                        }
+                        locationStatus.innerHTML = '<span class="text-danger">✗ ' + errorMsg + '</span>';
+                    },
+                    // Options
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                locationStatus.innerHTML = 
+                    '<span class="text-danger">✗ Geolocation is not supported by this browser.</span>';
+            }
+        });
+        
+        // Form submission
+        attendanceForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const section = document.getElementById('section').value;
+            const rollNumber = document.getElementById('rollNumber').value;
+            const latitude = latitudeInput.value;
+            const longitude = longitudeInput.value;
+            
+            // Disable form during submission
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
+            
+            // Make AJAX request to mark attendance
+            fetch('/mark-attendance/' + window.location.pathname.split('/').pop(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'name': name,
+                    'section': section,
+                    'rollNumber': rollNumber,
+                    'latitude': latitude,
+                    'longitude': longitude
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display result
+                if (data.status === 'success') {
+                    resultContainer.innerHTML = 
+                        '<div class="alert alert-success">' +
+                        '<h5>Attendance Marked Successfully!</h5>' +
+                        '<p>' + data.message + '</p>' +
+                        '</div>';
+                } else {
+                    resultContainer.innerHTML = 
+                        '<div class="alert alert-danger">' +
+                        '<h5>Error</h5>' +
+                        '<p>' + data.message + '</p>' +
+                        '</div>';
+                }
+                
+                // Show result
+                resultContainer.style.display = 'block';
+                
+                // Hide form if successful
+                if (data.status === 'success') {
+                    attendanceForm.style.display = 'none';
+                } else {
+                    // Re-enable form for retry
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Mark Attendance';
+                }
+            })
+            .catch(error => {
+                resultContainer.innerHTML = 
+                    '<div class="alert alert-danger">' +
+                    '<h5>Error</h5>' +
+                    '<p>An error occurred while submitting your attendance. Please try again.</p>' +
+                    '</div>';
+                resultContainer.style.display = 'block';
+                
+                // Re-enable form
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Mark Attendance';
+            });
+        });
+    </script>
+</body>
+</html>

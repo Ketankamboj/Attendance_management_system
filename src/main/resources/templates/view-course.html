@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${'Course: ' + course.name}">Course Details</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="bg-dark text-white py-3">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h4 mb-0">Attendance Management System</h1>
+                <div>
+                    <span class="me-3" th:text="${'Welcome, ' + session.teacherName}">Welcome, Teacher</span>
+                    <a href="/logout" class="btn btn-sm btn-outline-light">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0" th:text="${course.name}">Course Name</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <strong>Course Code:</strong>
+                            </div>
+                            <div class="col-md-9" th:text="${course.courseCode}">
+                                CS101
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <strong>Schedule:</strong>
+                            </div>
+                            <div class="col-md-9" th:text="${course.schedule}">
+                                MWF 10:00-11:30
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="/courses" class="btn btn-secondary">Back to Courses</a>
+                            <div>
+                                <a th:href="@{'/courses/' + ${course.id} + '/edit'}" class="btn btn-warning me-2">Edit Course</a>
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete Course</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Attendance Sessions</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>You can create and manage attendance sessions for this course.</p>
+                        <a href="/create-session" class="btn btn-primary">Create Attendance Session</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this course? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form th:action="@{'/courses/' + ${course.id} + '/delete'}" method="post">
+                        <button type="submit" class="btn btn-danger">Delete Course</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

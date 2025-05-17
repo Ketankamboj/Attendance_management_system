@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${pageTitle}">Create Attendance Session</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="bg-dark text-white py-3">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h4 mb-0">Attendance Management System</h1>
+                <div>
+                    <span class="me-3">Welcome, Teacher</span>
+                    <a href="/" class="btn btn-sm btn-outline-light">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Create Attendance Session</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/create-session" method="post">
+                            <div class="mb-3">
+                                <label for="courseName" class="form-label">Course Name</label>
+                                <input type="text" class="form-control" id="courseName" name="courseName" required>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Location Settings</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3">Set the geographic location where attendance can be marked and specify an allowed radius in meters.</p>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="latitude" class="form-label">Latitude</label>
+                                            <input type="number" class="form-control" id="latitude" name="latitude" required step="any">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="longitude" class="form-label">Longitude</label>
+                                            <input type="number" class="form-control" id="longitude" name="longitude" required step="any">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="radius" class="form-label">Allowed Radius (meters)</label>
+                                        <input type="number" class="form-control" id="radius" name="radius" required min="10" step="1" value="100">
+                                        <div class="form-text">Students must be within this distance from the specified location to be marked present.</div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-outline-primary" id="getCurrentLocation">
+                                        <i class="bi bi-geo-alt"></i> Use My Current Location
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="duration" class="form-label">Session Duration (minutes)</label>
+                                <input type="number" class="form-control" id="duration" name="duration" required min="5" value="60">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Create Session</button>
+                            <a href="/dashboard" class="btn btn-secondary">Cancel</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('getCurrentLocation').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    document.getElementById('latitude').value = position.coords.latitude;
+                    document.getElementById('longitude').value = position.coords.longitude;
+                }, function(error) {
+                    alert('Error getting location: ' + error.message);
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        });
+    </script>
+</body>
+</html>

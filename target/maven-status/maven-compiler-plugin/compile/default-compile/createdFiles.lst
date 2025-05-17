@@ -1,0 +1,12 @@
+com\attendance\system\controller\CourseController.class
+com\attendance\system\service\TeacherService.class
+com\attendance\system\util\LocationUtils.class
+com\attendance\system\model\AttendanceRecord.class
+com\attendance\system\controller\AuthController.class
+com\attendance\system\model\AttendanceRecord$AttendanceStatus.class
+com\attendance\system\model\Teacher.class
+com\attendance\system\service\CourseService.class
+com\attendance\system\controller\HomeController.class
+com\attendance\system\controller\AttendanceController.class
+com\attendance\system\model\Course.class
+com\attendance\system\AttendanceApplication.class
